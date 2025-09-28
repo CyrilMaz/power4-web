@@ -1,7 +1,6 @@
 package main
 
 import (
-	"html/template"
 	"log"
 	"net/http"
 )
@@ -31,6 +30,24 @@ func (g *Game) Play(col int) {
 	for row := Rows - 1; row >= 0; row-- {
 		if g.Board[row][col] == 0 {
 			g.Board[row][col] = g.Current
+			//afficheage de la grille
+			http.HundleFunc("/grid", func(w ResponseWriter, r *Request) {
+				fmt.Fprint(<w, "<table border='1'>")
+				for _, r := range Rows {
+					fmt.Fprint(w, "<tr>")
+					for _, c := range r {
+						color := "white"
+						if g.Board[r][c] == 1 {
+							color = "red"
+						} else if g.Board[r][c] == 2 {
+							color = "yellow"
+						}
+						fmt.Fprintf(w, "<td style='width:50px;height:50px;background-color:%s'></td>", color)
+					}
+					fmt.Fprint(w, "</tr>")
+				}
+				fmt.Fprint(w, "</table>")
+			})
 			if g.checkWin(row, col) {
 				g.Winner = g.Current
 			} else {
@@ -78,12 +95,10 @@ func (g *Game) countDirection(r, c, dr, dc, player int) int {
 
 var (
 	game *Game
-	tmpl *template.Template
 )
 
 func main() {
 	game = NewGame()
-	tmpl = template.Must(template.New("index").Parse(htmlTemplate))
 
 	log.Println("Serveur lancé sur http://localhost:8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
