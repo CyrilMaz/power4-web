@@ -14,15 +14,20 @@ const (
 )
 
 type Game struct {
-	Board   [Rows][Columns]int
-	Current int
-	Winner  int
-	LastRow int
-	LastCol int
+	Board        [Rows][Columns]int
+	Current      int
+	Winner       int
+	LastRow      int
+	LastCol      int
+	WinningCells [][2]int
 }
 
 func NewGame() *Game {
-	return &Game{Current: 1, LastRow: -1, LastCol: -1}
+	return &Game{
+		Current: 1,
+		LastRow: -1,
+		LastCol: -1,
+	}
 }
 
 func (g *Game) Play(col int) {
@@ -46,21 +51,28 @@ func (g *Game) Play(col int) {
 func (g *Game) checkWin(r, c int) bool {
 	player := g.Board[r][c]
 	directions := [][2]int{
-		{0, 1}, {1, 0}, {1, 1}, {1, -1},
+		{0, 1},  // horizontal
+		{1, 0},  // vertical
+		{1, 1},  // diagonale ↘
+		{1, -1}, // diagonale ↙
 	}
+
 	for _, d := range directions {
-		count := 1
-		count += g.countDirection(r, c, d[0], d[1], player)
-		count += g.countDirection(r, c, -d[0], -d[1], player)
-		if count >= 4 {
+		cells := [][2]int{{r, c}}
+		cells = append(cells, g.collect(r, c, d[0], d[1], player)...)
+		cells = append(cells, g.collect(r, c, -d[0], -d[1], player)...)
+
+		if len(cells) >= 4 {
+			g.WinningCells = cells
 			return true
 		}
 	}
 	return false
 }
 
-func (g *Game) countDirection(r, c, dr, dc, player int) int {
-	count := 0
+// Helper pour collecter les positions alignées
+func (g *Game) collect(r, c, dr, dc, player int) [][2]int {
+	var cells [][2]int
 	for {
 		r += dr
 		c += dc
@@ -70,16 +82,26 @@ func (g *Game) countDirection(r, c, dr, dc, player int) int {
 		if g.Board[r][c] != player {
 			break
 		}
-		count++
+		cells = append(cells, [2]int{r, c})
 	}
-	return count
+	return cells
 }
 
 var (
 	game = NewGame()
 	mu   sync.Mutex
-	tmpl = template.Must(template.ParseFiles("templates/graphic.html"))
 )
+
+var tmpl = template.Must(template.New("").Funcs(template.FuncMap{
+	"isWinning": func(cells [][2]int, r, c int) bool {
+		for _, cell := range cells {
+			if cell[0] == r && cell[1] == c {
+				return true
+			}
+		}
+		return false
+	},
+}).ParseFiles("templates/graphic.html"))
 
 func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
