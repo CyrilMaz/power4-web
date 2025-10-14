@@ -107,7 +107,9 @@ func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		mu.Lock()
 		defer mu.Unlock()
-		tmpl.Execute(w, game)
+		if err := tmpl.Execute(w, game); err != nil {
+			log.Println("Erreur template:", err)
+		}
 	})
 
 	http.HandleFunc("/play", func(w http.ResponseWriter, r *http.Request) {
