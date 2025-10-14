@@ -25,14 +25,28 @@ h1 {
   background-color: #ddd;
   border: 2px solid #999;
   cursor: pointer;
+  transition: transform 0.3s ease-out;
 }
 
 .cell.player1 {
   background-color: red;
+  animation: drop 0.3s ease-out;
 }
 
 .cell.player2 {
   background-color: yellow;
+  animation: drop 0.3s ease-out;
+}
+
+@keyframes drop {
+  from {
+    transform: translateY(-80px);
+    opacity: 0.5;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 button {

@@ -44,3 +44,14 @@ document.getElementById("restart").addEventListener("click", async () => {
   await fetch("/reset");
   updateBoard();
 });
+
+if (state.board[r][c] === 1) {
+  cell.classList.add("player1");
+  cell.style.animation = "none";
+  setTimeout(() => (cell.style.animation = ""), 10);
+}
+if (state.board[r][c] === 2) {
+  cell.classList.add("player2");
+  cell.style.animation = "none";
+  setTimeout(() => (cell.style.animation = ""), 10);
+}
