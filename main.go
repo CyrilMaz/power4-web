@@ -92,7 +92,7 @@ var (
 	mu   sync.Mutex
 )
 
-var tmpl = template.Must(template.New("").Funcs(template.FuncMap{
+var tmpl = template.Must(template.New("graphic.html").Funcs(template.FuncMap{
 	"isWinning": func(cells [][2]int, r, c int) bool {
 		for _, cell := range cells {
 			if cell[0] == r && cell[1] == c {
