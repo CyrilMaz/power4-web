@@ -1,18 +1,26 @@
 document.addEventListener("DOMContentLoaded", () => {
-  // ---- Effet sonore "plop" quand on clique pour jouer un pion ----
+  // Toutes les cellules du plateau
   document.querySelectorAll(".cell").forEach(cell => {
-    cell.addEventListener("click", () => {
-      const plop = new Audio("/static/plop.wav");
+    cell.addEventListener("click", event => {
+      event.preventDefault(); // ❌ empêche la redirection immédiate
+
+      const url = cell.getAttribute("href"); // garde l’URL du coup
+      const plop = new Audio("/static/plop.mp3");
       plop.volume = 0.6;
       plop.play();
+
+      // ✅ redirection après 150 ms (temps de jouer le son)
+      setTimeout(() => {
+        window.location.href = url;
+      }, 150);
     });
   });
 
-  // ---- Si un joueur a gagné, jouer le son de victoire ----
+  // Si un joueur a gagné → jouer son de victoire
   const status = document.getElementById("status");
   if (status && status.textContent.includes("a gagné")) {
-    const win = new Audio("/static/win.wav");
+    const win = new Audio("/static/win.mp3");
     win.volume = 0.8;
-    setTimeout(() => win.play(), 400); // petit délai pour le timing
+    setTimeout(() => win.play(), 400);
   }
 });
