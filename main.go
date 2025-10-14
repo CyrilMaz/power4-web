@@ -1,10 +1,12 @@
 package main
 
 import (
-	"fmt"
-	"strconv"
+	"encoding/json"
+	"html/template"
 	"log"
 	"net/http"
+	"strconv"
+	"sync"
 )
 
 const (
@@ -13,9 +15,9 @@ const (
 )
 
 type Game struct {
-	Board   [Rows][Columns]int
-	Current int
-	Winner  int
+	Board   [Rows][Columns]int `json:"board"`
+	Current int                `json:"current"`
+	Winner  int                `json:"winner"`
 }
 
 func NewGame() *Game {
@@ -78,47 +80,57 @@ func (g *Game) countDirection(r, c, dr, dc, player int) int {
 }
 
 var (
-	game *Game
-	input int
+	game = NewGame()
+	mu   sync.Mutex
 )
 
 func main() {
-	game = NewGame()
-	
+	// Serve the static HTML page at /
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprint(w, `<table border="1">`)
-		for r := 0; r < Rows; r++ {
-			fmt.Fprint(w, "<tr>")
-			for c := 0; c < Columns; c++ {
-				color := "white"
-				if game.Board[r][c] == 1 {
-					color = "red"
-				} else if game.Board[r][c] == 2 {
-					color = "yellow"
-				}
-				if game.Winner != 0 {
-					fmt.Fprintf(w, `<td style='width:50px;height:50px;background-color:%v'></td>`, color)
-				} else {
-					fmt.Fprintf(w, 
-						`<td style='width:50px;height:50px;background-color:%v'>
-						<a href="/play?column=%v">%v<a>
-						</td>`, color, c, c)
-				}
-			}
-			fmt.Fprint(w, "</tr>")
-		}
-		fmt.Fprint(w, "</table>")
-		if game.Winner != 0 {
-			fmt.Fprintf(w, `<p style="font-size:50px;font-width:bold">Player %v win</p>`, game.Winner)
-		}
+		mu.Lock()
+		defer mu.Unlock()
+		// passer éventuellement l'état du jeu au template
+		tmpl.Execute(w, game)
 	})
 
+	// Serve static files (script.js, style.css) directly
+	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("."))))
+
+	// Return current game state as JSON
+	http.HandleFunc("/state", func(w http.ResponseWriter, r *http.Request) {
+		mu.Lock()
+		defer mu.Unlock()
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(game)
+	})
+
+	// Play a column. Accepts GET ?column= or POST JSON {"column":n}
 	http.HandleFunc("/play", func(w http.ResponseWriter, r *http.Request) {
-		col, _ := strconv.Atoi(r.URL.Query().Get("column"))
+		var col int
+		if r.Method == http.MethodPost {
+			var body struct {
+				Column int `json:"column"`
+			}
+			if err := json.NewDecoder(r.Body).Decode(&body); err == nil {
+				col = body.Column
+			}
+		} else {
+			col, _ = strconv.Atoi(r.URL.Query().Get("column"))
+		}
+
+		mu.Lock()
 		game.Play(col)
-		http.Redirect(w, r, "/", http.StatusSeeOther)
+		mu.Unlock()
+
+		// return updated state
+		mu.Lock()
+		defer mu.Unlock()
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(game)
 	})
 
 	log.Println("Serveur lancé sur http://localhost:8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
+
+var tmpl = template.Must(template.ParseFiles("templates/graphic.html"))
