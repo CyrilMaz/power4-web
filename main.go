@@ -94,7 +94,7 @@ func main() {
 	})
 
 	// Serve static files (script.js, style.css) directly
-	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("."))))
+	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
 	// Return current game state as JSON
 	http.HandleFunc("/state", func(w http.ResponseWriter, r *http.Request) {
@@ -126,6 +126,13 @@ func main() {
 		mu.Lock()
 		defer mu.Unlock()
 		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(game)
+	})
+
+	http.HandleFunc("/reset", func(w http.ResponseWriter, r *http.Request) {
+		mu.Lock()
+		defer mu.Unlock()
+		game = NewGame()
 		json.NewEncoder(w).Encode(game)
 	})
 
