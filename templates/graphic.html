@@ -9,12 +9,22 @@
 <body>
   <h1>Puissance 4</h1>
 
-  <button id="themeToggle">🌙 Mode sombre</button>
+  {{if eq .Winner 0}}
+    <p id="status">Tour du joueur {{.Current}} {{if eq .Current 1}}🔴{{else}}🟡{{end}}</p>
+  {{else}}
+    <p id="status">🎉 Joueur {{.Winner}} a gagné !</p>
+  {{end}}
 
-  <p id="status">Chargement du jeu...</p>
+  <div class="board">
+    {{range $r, $row := .Board}}
+      {{range $c, $cell := $row}}
+        <a href="/play?col={{$c}}" class="cell {{if eq $cell 1}}player1{{else if eq $cell 2}}player2{{end}}"></a>
+      {{end}}
+    {{end}}
+  </div>
 
-  <div id="board" class="board"></div>
-
-  <button id="restart">🔄 Recommencer</button>
+  <form action="/reset" method="get">
+    <button type="submit">🔄 Recommencer</button>
+  </form>
 </body>
 </html>

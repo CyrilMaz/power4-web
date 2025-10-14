@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"html/template"
 	"log"
 	"net/http"
@@ -14,10 +13,11 @@ const (
 	Columns = 7
 )
 
+// --- Structure du jeu ---
 type Game struct {
-	Board   [Rows][Columns]int `json:"board"`
-	Current int                `json:"current"`
-	Winner  int                `json:"winner"`
+	Board   [Rows][Columns]int
+	Current int
+	Winner  int
 }
 
 func NewGame() *Game {
@@ -79,65 +79,41 @@ func (g *Game) countDirection(r, c, dr, dc, player int) int {
 	return count
 }
 
+// --- Variables globales ---
 var (
 	game = NewGame()
 	mu   sync.Mutex
+	tmpl = template.Must(template.ParseFiles("templates/graphic.html"))
 )
 
 func main() {
-	// Serve the static HTML page at /
+	// Route principale : affiche le jeu
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		mu.Lock()
 		defer mu.Unlock()
-		// passer éventuellement l'état du jeu au template
 		tmpl.Execute(w, game)
 	})
 
-	// Serve static files (script.js, style.css) directly
-	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
-
-	// Return current game state as JSON
-	http.HandleFunc("/state", func(w http.ResponseWriter, r *http.Request) {
-		mu.Lock()
-		defer mu.Unlock()
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(game)
-	})
-
-	// Play a column. Accepts GET ?column= or POST JSON {"column":n}
+	// Joue un coup dans une colonne
 	http.HandleFunc("/play", func(w http.ResponseWriter, r *http.Request) {
-		var col int
-		if r.Method == http.MethodPost {
-			var body struct {
-				Column int `json:"column"`
-			}
-			if err := json.NewDecoder(r.Body).Decode(&body); err == nil {
-				col = body.Column
-			}
-		} else {
-			col, _ = strconv.Atoi(r.URL.Query().Get("column"))
-		}
-
+		col, _ := strconv.Atoi(r.URL.Query().Get("col"))
 		mu.Lock()
 		game.Play(col)
 		mu.Unlock()
-
-		// return updated state
-		mu.Lock()
-		defer mu.Unlock()
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(game)
+		http.Redirect(w, r, "/", http.StatusSeeOther)
 	})
 
+	// Réinitialise la partie
 	http.HandleFunc("/reset", func(w http.ResponseWriter, r *http.Request) {
 		mu.Lock()
-		defer mu.Unlock()
 		game = NewGame()
-		json.NewEncoder(w).Encode(game)
+		mu.Unlock()
+		http.Redirect(w, r, "/", http.StatusSeeOther)
 	})
 
-	log.Println("Serveur lancé sur http://localhost:8080")
+	// Sert les fichiers statiques
+	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
+
+	log.Println("Serveur démarré sur http://localhost:8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
-
-var tmpl = template.Must(template.ParseFiles("templates/graphic.html"))
