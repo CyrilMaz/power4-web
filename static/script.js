@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
       // ✅ redirection après 150 ms (temps de jouer le son)
       setTimeout(() => {
         window.location.href = url;
-      }, 250);
+      }, 350);
     });
   });
 
