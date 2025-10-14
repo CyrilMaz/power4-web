@@ -13,7 +13,6 @@ const (
 	Columns = 7
 )
 
-// --- Structure du jeu ---
 type Game struct {
 	Board   [Rows][Columns]int
 	Current int
@@ -47,10 +46,7 @@ func (g *Game) Play(col int) {
 func (g *Game) checkWin(r, c int) bool {
 	player := g.Board[r][c]
 	directions := [][2]int{
-		{0, 1},
-		{1, 0},
-		{1, 1},
-		{1, -1},
+		{0, 1}, {1, 0}, {1, 1}, {1, -1},
 	}
 	for _, d := range directions {
 		count := 1
@@ -79,7 +75,6 @@ func (g *Game) countDirection(r, c, dr, dc, player int) int {
 	return count
 }
 
-// --- Variables globales ---
 var (
 	game = NewGame()
 	mu   sync.Mutex
@@ -87,14 +82,12 @@ var (
 )
 
 func main() {
-	// Route principale : affiche le jeu
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		mu.Lock()
 		defer mu.Unlock()
 		tmpl.Execute(w, game)
 	})
 
-	// Joue un coup dans une colonne
 	http.HandleFunc("/play", func(w http.ResponseWriter, r *http.Request) {
 		col, _ := strconv.Atoi(r.URL.Query().Get("col"))
 		mu.Lock()
@@ -103,7 +96,6 @@ func main() {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 	})
 
-	// Réinitialise la partie
 	http.HandleFunc("/reset", func(w http.ResponseWriter, r *http.Request) {
 		mu.Lock()
 		game = NewGame()
@@ -111,9 +103,8 @@ func main() {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 	})
 
-	// Sert les fichiers statiques
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
-	log.Println("Serveur démarré sur http://localhost:8080")
+	log.Println("Serveur sur http://localhost:8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
