@@ -15,13 +15,18 @@
     <p id="status">🎉 Joueur {{.Winner}} a gagné !</p>
   {{end}}
 
-  <div class="board">
-    {{range $r, $row := .Board}}
-      {{range $c, $cell := $row}}
-        <a href="/play?col={{$c}}" class="cell {{if eq $cell 1}}player1{{else if eq $cell 2}}player2{{end}}"></a>
-      {{end}}
+ <div class="board">
+  {{range $r, $row := .Board}}
+    {{range $c, $cell := $row}}
+      <a href="/play?col={{$c}}"
+         class="cell
+                {{if eq $cell 1}}player1{{else if eq $cell 2}}player2{{end}}
+                {{if and (eq $.LastRow $r) (eq $.LastCol $c)}}lastMove{{end}}">
+      </a>
     {{end}}
-  </div>
+  {{end}}
+</div>
+
 
   <form action="/reset" method="get">
     <button type="submit">🔄 Recommencer</button>

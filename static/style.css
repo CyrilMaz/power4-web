@@ -50,6 +50,10 @@ h1 {
   animation: drop 0.3s ease-out;
 }
 
+.lastMove {
+  animation: drop 0.5s ease-out;
+}
+
 @keyframes drop {
   0% {
     transform: translateY(-150px) scale(0.9);

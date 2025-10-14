@@ -18,22 +18,22 @@ type Game struct {
 	Board   [Rows][Columns]int
 	Current int
 	Winner  int
+	LastRow int
+	LastCol int
 }
 
 func NewGame() *Game {
-	return &Game{Current: 1}
+	return &Game{Current: 1, LastRow: -1, LastCol: -1}
 }
 
 func (g *Game) Play(col int) {
-	if g.Winner != 0 {
-		return
-	}
-	if col < 0 || col >= Columns {
+	if g.Winner != 0 || col < 0 || col >= Columns {
 		return
 	}
 	for row := Rows - 1; row >= 0; row-- {
 		if g.Board[row][col] == 0 {
 			g.Board[row][col] = g.Current
+			g.LastRow, g.LastCol = row, col
 			if g.checkWin(row, col) {
 				g.Winner = g.Current
 			} else {
