@@ -27,31 +27,30 @@ async function updateBoard() {
 
   if (state.winner !== 0) {
     statusEl.textContent = `🎉 Joueur ${state.winner} a gagné !`;
+    celebrateWin(state.winner);
   } else {
     statusEl.textContent = `Tour du joueur ${state.current}`;
   }
 }
 
-document.getElementById("restart").addEventListener("click", async () => {
-  // simple reload trick
-  await fetch("/play?column=-1"); // inutile mais évite blocage
-  location.reload();
-});
-
-updateBoard();
+function celebrateWin(winner) {
+  const cells = document.querySelectorAll(".cell.player" + winner);
+  cells.forEach((cell, i) => {
+    setTimeout(() => cell.classList.add("winning"), i * 100);
+  });
+}
 
 document.getElementById("restart").addEventListener("click", async () => {
   await fetch("/reset");
   updateBoard();
 });
 
-if (state.board[r][c] === 1) {
-  cell.classList.add("player1");
-  cell.style.animation = "none";
-  setTimeout(() => (cell.style.animation = ""), 10);
-}
-if (state.board[r][c] === 2) {
-  cell.classList.add("player2");
-  cell.style.animation = "none";
-  setTimeout(() => (cell.style.animation = ""), 10);
-}
+updateBoard();
+
+const themeBtn = document.getElementById("themeToggle");
+themeBtn.addEventListener("click", () => {
+  document.body.classList.toggle("dark");
+  themeBtn.textContent = document.body.classList.contains("dark")
+    ? "☀️ Mode clair"
+    : "🌙 Mode sombre";
+});
