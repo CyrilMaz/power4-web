@@ -39,7 +39,6 @@ h1 {
   transform: scale(1.1);
 }
 
-/* Pions statiques */
 .player1 {
   background: radial-gradient(circle at 30% 30%, #ff5252, #c62828);
 }
@@ -48,7 +47,6 @@ h1 {
   background: radial-gradient(circle at 30% 30%, #ffee58, #fbc02d);
 }
 
-/* Seul le dernier pion joue l'animation */
 .lastMove {
   animation: drop 0.5s ease-out;
 }
