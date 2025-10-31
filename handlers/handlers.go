@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"sync"
 
-	"power-web/game"
+	"https://github.com/CyrilMaz/power4-web/game"
 )
 
 var (
