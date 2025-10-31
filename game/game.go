@@ -43,13 +43,17 @@ func (g *Game) Play(col int) {
 func (g *Game) checkWin(r, c int) bool {
 	player := g.Board[r][c]
 	directions := [][2]int{
-		{0, 1}, {1, 0}, {1, 1}, {1, -1},
+		{0, 1},  // horizontal
+		{1, 0},  // vertical
+		{1, 1},  // diagonale ↘
+		{1, -1}, // diagonale ↙
 	}
 
 	for _, d := range directions {
 		cells := [][2]int{{r, c}}
 		cells = append(cells, g.collect(r, c, d[0], d[1], player)...)
 		cells = append(cells, g.collect(r, c, -d[0], -d[1], player)...)
+
 		if len(cells) >= 4 {
 			g.WinningCells = cells
 			return true
