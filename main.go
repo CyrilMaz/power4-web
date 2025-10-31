@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	"power4-web/handlers"
+	"github.com/CyrilMaz/power4-web/handlers"
 )
 
 func main() {
