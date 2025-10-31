@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       setTimeout(() => {
         window.location.href = url;
-      }, 500);
+      }, 600);
     });
   });
 

@@ -1,12 +1,4 @@
-package main
-
-import (
-	"html/template"
-	"log"
-	"net/http"
-	"strconv"
-	"sync"
-)
+package game
 
 const (
 	Rows    = 6
@@ -51,17 +43,13 @@ func (g *Game) Play(col int) {
 func (g *Game) checkWin(r, c int) bool {
 	player := g.Board[r][c]
 	directions := [][2]int{
-		{0, 1},
-		{1, 0},
-		{1, 1},
-		{1, -1},
+		{0, 1}, {1, 0}, {1, 1}, {1, -1},
 	}
 
 	for _, d := range directions {
 		cells := [][2]int{{r, c}}
 		cells = append(cells, g.collect(r, c, d[0], d[1], player)...)
 		cells = append(cells, g.collect(r, c, -d[0], -d[1], player)...)
-
 		if len(cells) >= 4 {
 			g.WinningCells = cells
 			return true
@@ -84,50 +72,4 @@ func (g *Game) collect(r, c, dr, dc, player int) [][2]int {
 		cells = append(cells, [2]int{r, c})
 	}
 	return cells
-}
-
-var (
-	game = NewGame()
-	mu   sync.Mutex
-)
-
-var tmpl = template.Must(template.New("graphic.html").Funcs(template.FuncMap{
-	"isWinning": func(cells [][2]int, r, c int) bool {
-		for _, cell := range cells {
-			if cell[0] == r && cell[1] == c {
-				return true
-			}
-		}
-		return false
-	},
-}).ParseFiles("templates/graphic.html"))
-
-func main() {
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		mu.Lock()
-		defer mu.Unlock()
-		if err := tmpl.Execute(w, game); err != nil {
-			log.Println("Erreur template:", err)
-		}
-	})
-
-	http.HandleFunc("/play", func(w http.ResponseWriter, r *http.Request) {
-		col, _ := strconv.Atoi(r.URL.Query().Get("col"))
-		mu.Lock()
-		game.Play(col)
-		mu.Unlock()
-		http.Redirect(w, r, "/", http.StatusSeeOther)
-	})
-
-	http.HandleFunc("/reset", func(w http.ResponseWriter, r *http.Request) {
-		mu.Lock()
-		game = NewGame()
-		mu.Unlock()
-		http.Redirect(w, r, "/", http.StatusSeeOther)
-	})
-
-	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
-
-	log.Println("Serveur sur http://localhost:8080")
-	log.Fatal(http.ListenAndServe(":8080", nil))
 }
