@@ -6,10 +6,9 @@ const (
 )
 
 type Power struct {
-	Name     string
-	Uses     int
-	MaxUses  int
-	Cooldown int
+	Name    string
+	Uses    int
+	MaxUses int
 }
 
 type Game struct {
@@ -53,6 +52,7 @@ func (g *Game) Play(col int) {
 			if g.checkWin(row, col) {
 				g.Winner = g.Current
 			} else {
+				g.WinningCells = nil
 				g.Current = 3 - g.Current
 			}
 			return
@@ -64,7 +64,6 @@ func (g *Game) UsePower(player int, powerName string, row, col int) bool {
 	if g.Winner != 0 || player != g.Current {
 		return false
 	}
-
 	powerIndex := -1
 	for i, p := range g.Powers[player] {
 		if p.Name == powerName && p.Uses > 0 {
@@ -72,7 +71,6 @@ func (g *Game) UsePower(player int, powerName string, row, col int) bool {
 			break
 		}
 	}
-
 	if powerIndex == -1 {
 		return false
 	}
@@ -85,13 +83,15 @@ func (g *Game) UsePower(player int, powerName string, row, col int) bool {
 		success = g.swapPieces(row, col)
 	case "Bloquer":
 		success = g.blockColumn(col)
+	default:
+		return false
 	}
 
 	if success {
 		g.Powers[player][powerIndex].Uses--
+		g.WinningCells = nil
 		g.Current = 3 - g.Current
 	}
-
 	return success
 }
 
@@ -99,7 +99,8 @@ func (g *Game) destroyPiece(row, col int) bool {
 	if row < 0 || row >= Rows || col < 0 || col >= Columns {
 		return false
 	}
-	if g.Board[row][col] == 0 || g.Board[row][col] == g.Current {
+	val := g.Board[row][col]
+	if val == 0 || val == 3 || val == g.Current {
 		return false
 	}
 	g.Board[row][col] = 0
@@ -111,10 +112,12 @@ func (g *Game) swapPieces(row, col int) bool {
 	if row < 0 || row >= Rows-1 || col < 0 || col >= Columns {
 		return false
 	}
-	if g.Board[row][col] == 0 || g.Board[row+1][col] == 0 {
+	v1 := g.Board[row][col]
+	v2 := g.Board[row+1][col]
+	if v1 == 0 || v2 == 0 || v1 == 3 || v2 == 3 {
 		return false
 	}
-	g.Board[row][col], g.Board[row+1][col] = g.Board[row+1][col], g.Board[row][col]
+	g.Board[row][col], g.Board[row+1][col] = v2, v1
 	return true
 }
 
@@ -127,6 +130,9 @@ func (g *Game) blockColumn(col int) bool {
 			g.Board[row][col] = 3
 			return true
 		}
+		if g.Board[row][col] == 3 {
+			return false
+		}
 	}
 	return false
 }
@@ -135,12 +141,22 @@ func (g *Game) applyGravity() {
 	for col := 0; col < Columns; col++ {
 		writePos := Rows - 1
 		for row := Rows - 1; row >= 0; row-- {
-			if g.Board[row][col] != 0 {
+			val := g.Board[row][col]
+			if val == 3 {
+				writePos = row - 1
+				continue
+			}
+			if val != 0 {
 				if row != writePos {
-					g.Board[writePos][col] = g.Board[row][col]
+					g.Board[writePos][col] = val
 					g.Board[row][col] = 0
 				}
 				writePos--
+			}
+		}
+		for r := writePos; r >= 0; r-- {
+			if g.Board[r][col] != 3 {
+				g.Board[r][col] = 0
 			}
 		}
 	}
@@ -148,38 +164,67 @@ func (g *Game) applyGravity() {
 
 func (g *Game) checkWin(r, c int) bool {
 	player := g.Board[r][c]
-	directions := [][2]int{
-		{0, 1},  // horizontal
-		{1, 0},  // vertical
-		{1, 1},  // diagonale ↘
-		{1, -1}, // diagonale ↙
+	if player == 0 || player == 3 {
+		return false
 	}
+	directions := [][2]int{{0, 1}, {1, 0}, {1, 1}, {1, -1}}
 
 	for _, d := range directions {
-		cells := [][2]int{{r, c}}
-		cells = append(cells, g.collect(r, c, d[0], d[1], player)...)
-		cells = append(cells, g.collect(r, c, -d[0], -d[1], player)...)
+		line := make([][2]int, 0, 8)
+		r0, c0 := r, c
+		for {
+			r0 -= d[0]
+			c0 -= d[1]
+			if r0 < 0 || r0 >= Rows || c0 < 0 || c0 >= Columns {
+				break
+			}
+			if g.Board[r0][c0] != player {
+				break
+			}
+			line = append(line, [2]int{r0, c0})
+		}
+		for i := 0; i < len(line)/2; i++ {
+			line[i], line[len(line)-1-i] = line[len(line)-1-i], line[i]
+		}
+		line = append(line, [2]int{r, c})
+		r1, c1 := r, c
+		for {
+			r1 += d[0]
+			c1 += d[1]
+			if r1 < 0 || r1 >= Rows || c1 < 0 || c1 >= Columns {
+				break
+			}
+			if g.Board[r1][c1] != player {
+				break
+			}
+			line = append(line, [2]int{r1, c1})
+		}
 
-		if len(cells) >= 4 {
-			g.WinningCells = cells
+		if len(line) >= 4 {
+			idx := -1
+			for i, cell := range line {
+				if cell[0] == r && cell[1] == c {
+					idx = i
+					break
+				}
+			}
+			if idx == -1 {
+				continue
+			}
+			start := idx - 3
+			if start < 0 {
+				start = 0
+			}
+			if start+4 > len(line) {
+				start = len(line) - 4
+			}
+			w := make([][2]int, 0, 4)
+			for i := start; i < start+4; i++ {
+				w = append(w, line[i])
+			}
+			g.WinningCells = w
 			return true
 		}
 	}
 	return false
-}
-
-func (g *Game) collect(r, c, dr, dc, player int) [][2]int {
-	var cells [][2]int
-	for {
-		r += dr
-		c += dc
-		if r < 0 || r >= Rows || c < 0 || c >= Columns {
-			break
-		}
-		if g.Board[r][c] != player {
-			break
-		}
-		cells = append(cells, [2]int{r, c})
-	}
-	return cells
 }

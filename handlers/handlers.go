@@ -35,7 +35,17 @@ func Home(w http.ResponseWriter, r *http.Request) {
 }
 
 func Play(w http.ResponseWriter, r *http.Request) {
-	col, _ := strconv.Atoi(r.URL.Query().Get("col"))
+	colStr := r.URL.Query().Get("col")
+	col, err := strconv.Atoi(colStr)
+	if err != nil {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+	if col < 0 || col >= game.Columns {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+
 	mu.Lock()
 	Game.Play(col)
 	mu.Unlock()
@@ -44,13 +54,24 @@ func Play(w http.ResponseWriter, r *http.Request) {
 
 func UsePower(w http.ResponseWriter, r *http.Request) {
 	power := r.URL.Query().Get("power")
-	row, _ := strconv.Atoi(r.URL.Query().Get("row"))
-	col, _ := strconv.Atoi(r.URL.Query().Get("col"))
+	rowStr := r.URL.Query().Get("row")
+	colStr := r.URL.Query().Get("col")
+
+	row, errRow := strconv.Atoi(rowStr)
+	col, errCol := strconv.Atoi(colStr)
+	if errCol != nil || col < 0 || col >= game.Columns {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+	if errRow != nil {
+		row = -1
+	}
 
 	mu.Lock()
-	Game.UsePower(Game.Current, power, row, col)
+	success := Game.UsePower(Game.Current, power, row, col)
 	mu.Unlock()
 
+	_ = success
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
