@@ -10,6 +10,7 @@ import (
 func main() {
 	http.HandleFunc("/", handlers.Home)
 	http.HandleFunc("/play", handlers.Play)
+	http.HandleFunc("/power", handlers.UsePower)
 	http.HandleFunc("/reset", handlers.Reset)
 
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))

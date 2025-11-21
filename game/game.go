@@ -5,6 +5,13 @@ const (
 	Columns = 7
 )
 
+type Power struct {
+	Name     string
+	Uses     int
+	MaxUses  int
+	Cooldown int
+}
+
 type Game struct {
 	Board        [Rows][Columns]int
 	Current      int
@@ -12,6 +19,7 @@ type Game struct {
 	LastRow      int
 	LastCol      int
 	WinningCells [][2]int
+	Powers       map[int][]Power
 }
 
 func NewGame() *Game {
@@ -19,6 +27,18 @@ func NewGame() *Game {
 		Current: 1,
 		LastRow: -1,
 		LastCol: -1,
+		Powers: map[int][]Power{
+			1: {
+				{Name: "destroy", Uses: 2, MaxUses: 2},
+				{Name: "swap", Uses: 1, MaxUses: 1},
+				{Name: "block", Uses: 1, MaxUses: 1},
+			},
+			2: {
+				{Name: "destroy", Uses: 2, MaxUses: 2},
+				{Name: "swap", Uses: 1, MaxUses: 1},
+				{Name: "block", Uses: 1, MaxUses: 1},
+			},
+		},
 	}
 }
 
@@ -36,6 +56,92 @@ func (g *Game) Play(col int) {
 				g.Current = 3 - g.Current
 			}
 			return
+		}
+	}
+}
+
+func (g *Game) UsePower(player int, powerName string, row, col int) bool {
+	if g.Winner != 0 || player != g.Current {
+		return false
+	}
+
+	powerIndex := -1
+	for i, p := range g.Powers[player] {
+		if p.Name == powerName && p.Uses > 0 {
+			powerIndex = i
+			break
+		}
+	}
+
+	if powerIndex == -1 {
+		return false
+	}
+
+	success := false
+	switch powerName {
+	case "destroy":
+		success = g.destroyPiece(row, col)
+	case "swap":
+		success = g.swapPieces(row, col)
+	case "block":
+		success = g.blockColumn(col)
+	}
+
+	if success {
+		g.Powers[player][powerIndex].Uses--
+		g.Current = 3 - g.Current
+	}
+
+	return success
+}
+
+func (g *Game) destroyPiece(row, col int) bool {
+	if row < 0 || row >= Rows || col < 0 || col >= Columns {
+		return false
+	}
+	if g.Board[row][col] == 0 || g.Board[row][col] == g.Current {
+		return false
+	}
+	g.Board[row][col] = 0
+	g.applyGravity()
+	return true
+}
+
+func (g *Game) swapPieces(row, col int) bool {
+	if row < 0 || row >= Rows-1 || col < 0 || col >= Columns {
+		return false
+	}
+	if g.Board[row][col] == 0 || g.Board[row+1][col] == 0 {
+		return false
+	}
+	g.Board[row][col], g.Board[row+1][col] = g.Board[row+1][col], g.Board[row][col]
+	return true
+}
+
+func (g *Game) blockColumn(col int) bool {
+	if col < 0 || col >= Columns {
+		return false
+	}
+	for row := Rows - 1; row >= 0; row-- {
+		if g.Board[row][col] == 0 {
+			g.Board[row][col] = 3
+			return true
+		}
+	}
+	return false
+}
+
+func (g *Game) applyGravity() {
+	for col := 0; col < Columns; col++ {
+		writePos := Rows - 1
+		for row := Rows - 1; row >= 0; row-- {
+			if g.Board[row][col] != 0 {
+				if row != writePos {
+					g.Board[writePos][col] = g.Board[row][col]
+					g.Board[row][col] = 0
+				}
+				writePos--
+			}
 		}
 	}
 }

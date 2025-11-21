@@ -42,6 +42,18 @@ func Play(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
+func UsePower(w http.ResponseWriter, r *http.Request) {
+	power := r.URL.Query().Get("power")
+	row, _ := strconv.Atoi(r.URL.Query().Get("row"))
+	col, _ := strconv.Atoi(r.URL.Query().Get("col"))
+
+	mu.Lock()
+	Game.UsePower(Game.Current, power, row, col)
+	mu.Unlock()
+
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
 func Reset(w http.ResponseWriter, r *http.Request) {
 	mu.Lock()
 	Game = game.NewGame()
