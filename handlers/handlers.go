@@ -77,6 +77,18 @@ func UsePower(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
+// ToggleTheme switches between light and dark
+func ToggleTheme(w http.ResponseWriter, r *http.Request) {
+	mu.Lock()
+	if Game.Theme == "light" {
+		Game.Theme = "dark"
+	} else {
+		Game.Theme = "light"
+	}
+	mu.Unlock()
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
 func Reset(w http.ResponseWriter, r *http.Request) {
 	mu.Lock()
 	Game = game.NewGame()

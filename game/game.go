@@ -20,7 +20,8 @@ type Game struct {
 	LastCol      int
 	WinningCells [][2]int
 	Powers       map[int][]Power
-	Theme        string
+	Theme        string // light or dark
+       map[int][]Power
 }
 
 func NewGame() *Game {
@@ -28,6 +29,7 @@ func NewGame() *Game {
 		Current: 1,
 		LastRow: -1,
 		LastCol: -1,
+		Theme:   "light", // default theme
 		Powers: map[int][]Power{
 			1: {
 				{Name: "Détruire", Uses: 2, MaxUses: 2},
