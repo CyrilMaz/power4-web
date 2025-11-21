@@ -5,11 +5,23 @@ document.addEventListener("DOMContentLoaded", () => {
   const cells = document.querySelectorAll(".cell");
   const instruction = document.getElementById("power-instruction");
 
+  console.log("Boutons de pouvoir trouvés:", powerBtns.length);
+  console.log("Cellules trouvées:", cells.length);
+
   powerBtns.forEach(btn => {
-    btn.addEventListener("click", () => {
-      if (btn.classList.contains("disabled")) return;
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      console.log("Bouton cliqué:", btn.dataset.power);
+
+      if (btn.classList.contains("disabled")) {
+        console.log("Bouton désactivé");
+        return;
+      }
 
       if (btn.classList.contains("active")) {
+        console.log("Désactivation du pouvoir");
         deactivateAllPowers();
         return;
       }
@@ -17,6 +29,8 @@ document.addEventListener("DOMContentLoaded", () => {
       deactivateAllPowers();
       activePower = btn.dataset.power;
       btn.classList.add("active");
+      
+      console.log("Pouvoir activé:", activePower);
       
       if (instruction) {
         instruction.classList.remove("hidden");
@@ -35,22 +49,24 @@ document.addEventListener("DOMContentLoaded", () => {
         const col = cell.dataset.col;
         const url = `/power?power=${activePower}&row=${row}&col=${col}`;
         
+        console.log("Utilisation du pouvoir:", activePower, "sur", row, col);
+        
         const plop = new Audio("/static/plop.wav");
         plop.volume = 0.6;
-        plop.play();
+        plop.play().catch(() => console.log("Pas de son"));
 
         setTimeout(() => {
           window.location.href = url;
-        }, 600);
+        }, 300);
       } else {
         const url = cell.getAttribute("href");
         const plop = new Audio("/static/plop.wav");
         plop.volume = 0.6;
-        plop.play();
+        plop.play().catch(() => console.log("Pas de son"));
 
         setTimeout(() => {
           window.location.href = url;
-        }, 600);
+        }, 300);
       }
     });
   });
@@ -59,7 +75,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (status && status.textContent.includes("a gagné")) {
     const win = new Audio("/static/win.wav");
     win.volume = 0.8;
-    setTimeout(() => win.play(), 400);
+    setTimeout(() => win.play().catch(() => console.log("Pas de son")), 400);
   }
 });
 
