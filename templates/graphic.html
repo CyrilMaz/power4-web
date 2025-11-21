@@ -6,7 +6,10 @@
   <link rel="stylesheet" href="/static/style.css">
   <script src="/static/script.js" defer></script>
 </head>
-<body>
+<body class="{{.Theme}}">
+  <div class="theme-toggle-container">
+    <a href="/set-theme" id="theme-toggle" class="theme-toggle">Changer le thème</a>
+  </div>
   <h1>Puissance 4 Mode Pouvoirs</h1>
 
   {{if eq .Winner 0}}
