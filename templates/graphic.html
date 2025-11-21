@@ -24,7 +24,7 @@
           <button class="power-btn {{if eq .Uses 0}}disabled{{end}}" 
                   data-power="{{.Name}}"
                   {{if eq .Uses 0}}disabled{{end}}>
-            {{if eq .Name "destroy"}{{else if eq .Name "swap"}}🔄{{else if eq .Name "block"}}🚫{{end}} 
+            {if eq .Name "destroy"}{{else if eq .Name "swap"}}🔄{{else if eq .Name "block"}}🚫{{end}} 
             {{.Name}}
             <span class="power-uses">({{.Uses}}/{{.MaxUses}})</span>
           </button>
