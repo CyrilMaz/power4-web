@@ -29,14 +29,14 @@ func NewGame() *Game {
 		LastCol: -1,
 		Powers: map[int][]Power{
 			1: {
-				{Name: "destroy", Uses: 2, MaxUses: 2},
-				{Name: "swap", Uses: 1, MaxUses: 1},
-				{Name: "block", Uses: 1, MaxUses: 1},
+				{Name: "Détruire", Uses: 2, MaxUses: 2},
+				{Name: "Échanger", Uses: 1, MaxUses: 1},
+				{Name: "Bloquer", Uses: 1, MaxUses: 1},
 			},
 			2: {
-				{Name: "destroy", Uses: 2, MaxUses: 2},
-				{Name: "swap", Uses: 1, MaxUses: 1},
-				{Name: "block", Uses: 1, MaxUses: 1},
+				{Name: "Détruire", Uses: 2, MaxUses: 2},
+				{Name: "Échanger", Uses: 1, MaxUses: 1},
+				{Name: "Bloquer", Uses: 1, MaxUses: 1},
 			},
 		},
 	}
@@ -79,11 +79,11 @@ func (g *Game) UsePower(player int, powerName string, row, col int) bool {
 
 	success := false
 	switch powerName {
-	case "destroy":
+	case "Détruire":
 		success = g.destroyPiece(row, col)
-	case "swap":
+	case "Échanger":
 		success = g.swapPieces(row, col)
-	case "block":
+	case "Bloquer":
 		success = g.blockColumn(col)
 	}
 
