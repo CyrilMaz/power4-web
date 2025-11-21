@@ -6,10 +6,7 @@
   <link rel="stylesheet" href="/static/style.css">
   <script src="/static/script.js" defer></script>
 </head>
-<body class="{{.Theme}}">
-  <div class="theme-toggle-container">
-    <a href="/set-theme" id="theme-toggle" class="theme-toggle">Changer le thème</a>
-  </div>
+<body>
   <h1>Puissance 4 Mode Pouvoirs</h1>
 
   {{if eq .Winner 0}}
@@ -26,7 +23,7 @@
         {{range $powers}}
           <button class="power-btn{{if eq .Uses 0}} disabled{{end}}" 
                   data-power="{{.Name}}"
-                  {{if eq .Uses 0}}disabled{{end}}>
+                  {{if eq .Uses 0}}disabled aria-disabled="true"{{end}}>
             {{if eq .Name "Détruire"}}💣{{else if eq .Name "Échanger"}}🔄{{else if eq .Name "Bloquer"}}🚫{{end}} 
             {{.Name}}
             <span class="power-uses">({{.Uses}}/{{.MaxUses}})</span>
@@ -43,7 +40,8 @@
         <a href="/play?col={{$c}}"
            class="cell{{if eq $cell 1}} player1{{else if eq $cell 2}} player2{{else if eq $cell 3}} blocked{{end}}{{if and (eq $.LastRow $r) (eq $.LastCol $c)}} lastMove{{end}}{{if isWinning $.WinningCells $r $c}} winning{{end}}"
            data-row="{{$r}}"
-           data-col="{{$c}}">
+           data-col="{{$c}}"
+           {{if eq $cell 3}} aria-disabled="true" title="Colonne bloquée"{{end}}>
         </a>
       {{end}}
     {{end}}
@@ -56,9 +54,9 @@
   <div class="help-section">
     <h3>📖 Guide des pouvoirs :</h3>
     <ul>
-      <li>💣 <strong>Destruction</strong> : Détruit une pièce adverse (la gravité s'applique)</li>
-      <li>🔄 <strong>Échange</strong> : Échange deux pièces verticalement adjacentes</li>
-      <li>🚫 <strong>Bloqué</strong> : Bloque une colonne avec une pièce neutre</li>
+      <li>💣 <strong>Détruire</strong> : Détruit une pièce adverse (la gravité s'applique)</li>
+      <li>🔄 <strong>Échange</strong> : Échange une pièce avec celle en dessous</li>
+      <li>🚫 <strong>Bloquer</strong> : Place un bloc neutre dans la colonne (ne tombe pas)</li>
     </ul>
   </div>
 </body>
