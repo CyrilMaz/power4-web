@@ -8,7 +8,6 @@ import (
 	"sync"
 
 	"github.com/CyrilMaz/power4-web/game"
-	"github.com/CyrilMaz/power4-web/theme"
 )
 
 var (
@@ -27,16 +26,10 @@ var tmpl = template.Must(template.New("graphic.html").Funcs(template.FuncMap{
 	},
 }).ParseFiles("templates/graphic.html"))
 
-type PageData struct {
-	*game.Game
-	Theme string
-}
-
 func Home(w http.ResponseWriter, r *http.Request) {
 	mu.Lock()
 	defer mu.Unlock()
-	data := PageData{Game: Game, Theme: theme.GetTheme(r)}
-	if err := tmpl.Execute(w, data); err != nil {
+	if err := tmpl.Execute(w, Game); err != nil {
 		log.Println("Erreur template:", err)
 	}
 }
@@ -70,15 +63,17 @@ func UsePower(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
 	}
+	// row may be -1 for column-only powers
 	if errRow != nil {
 		row = -1
 	}
 
 	mu.Lock()
+	// validation supplémentaire selon le pouvoir
 	success := Game.UsePower(Game.Current, power, row, col)
 	mu.Unlock()
 
-	_ = success
+	_ = success // pour l'instant on redirige toujours vers / ; on pourrait afficher un message
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 

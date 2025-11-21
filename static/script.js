@@ -33,12 +33,18 @@ function markColumns() {
 }
 
 function highlightValidTargets(power) {
+  // règles simples :
+  // - Détruire : cible une pièce adverse (1 case contenant l'autre joueur)
+  // - Échanger : cible une pièce qui a une pièce en dessous non vide et non bloc
+  // - Bloquer : cible une colonne (on utilisera la colonne via data-col)
 
   const cells = document.querySelectorAll('.cell');
   cells.forEach(cell => {
     cell.classList.remove('power-target');
+    // ignorer les cases bloquées
     if (cell.classList.contains('blocked')) return;
     if (power === 'Détruire') {
+      // target si pièce adverse
       if (cell.classList.contains('player1') || cell.classList.contains('player2')) {
         cell.classList.add('power-target');
       }
@@ -47,11 +53,15 @@ function highlightValidTargets(power) {
       const col = cell.dataset.col;
       const below = document.querySelector(`.cell[data-row='${row+1}'][data-col='${col}']`);
       if (below && !below.classList.contains('blocked') && (cell.classList.contains('player1') || cell.classList.contains('player2')) && !below.classList.contains('player1') && !below.classList.contains('player2')) {
+        // ne pas permettre échange si dessous est vide ou bloc
       }
+      // simplification: permettre cible si elle et la suivante sont non vides et non blocked
       if (below && !cell.classList.contains('blocked') && !below.classList.contains('blocked') && ( (cell.classList.contains('player1')||cell.classList.contains('player2')) && (below.classList.contains('player1')||below.classList.contains('player2')))) {
         cell.classList.add('power-target');
       }
     } else if (power === 'Bloquer') {
+      // on surligne le top de chaque colonne vide (cell with highest row that is empty)
+      // simple approche : surligner toutes les cellules vides qui ont en dessous soit un jeton, soit sont au fond
       if (!cell.classList.contains('player1') && !cell.classList.contains('player2') && !cell.classList.contains('blocked')) {
         cell.classList.add('power-target');
       }
@@ -87,9 +97,11 @@ document.addEventListener('DOMContentLoaded', () => {
   cells.forEach(cell => {
     cell.addEventListener('click', event => {
       event.preventDefault();
+      // si colonne bloquée ou pleine -> ignore
       if (cell.getAttribute('aria-disabled') === 'true') return;
 
       if (activePower) {
+        // si cible n'est pas marquée comme valide, ignore
         if (!cell.classList.contains('power-target')) return;
         const row = cell.dataset.row;
         const col = cell.dataset.col;
@@ -97,6 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const plop = new Audio('/static/plop.wav');
         plop.volume = 0.6;
         plop.play().catch(()=>{});
+        // empêcher d'autres clics
         document.querySelectorAll('.cell').forEach(c=>c.style.pointerEvents='none');
         setTimeout(()=> window.location.href = url, 300);
       } else {
