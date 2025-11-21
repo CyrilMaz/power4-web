@@ -21,10 +21,10 @@
       <div class="powers-list">
         {{$powers := index .Powers .Current}}
         {{range $powers}}
-          <button class="power-btn {{if eq .Uses 0}}disabled{{end}}" 
+          <button class="power-btn{{if eq .Uses 0}} disabled{{end}}" 
                   data-power="{{.Name}}"
                   {{if eq .Uses 0}}disabled{{end}}>
-            {if eq .Name "destroy"}{{else if eq .Name "swap"}}🔄{{else if eq .Name "block"}}🚫{{end}} 
+            {{if eq .Name "destroy"}}💣{{else if eq .Name "swap"}}🔄{{else if eq .Name "block"}}🚫{{end}} 
             {{.Name}}
             <span class="power-uses">({{.Uses}}/{{.MaxUses}})</span>
           </button>
@@ -38,10 +38,7 @@
     {{range $r, $row := .Board}}
       {{range $c, $cell := $row}}
         <a href="/play?col={{$c}}"
-           class="cell
-                  {{if eq $cell 1}}player1{{else if eq $cell 2}}player2{{else if eq $cell 3}}blocked{{end}}
-                  {{if and (eq $.LastRow $r) (eq $.LastCol $c)}}lastMove{{end}}
-                  {{if isWinning $.WinningCells $r $c}}winning{{end}}"
+           class="cell{{if eq $cell 1}} player1{{else if eq $cell 2}} player2{{else if eq $cell 3}} blocked{{end}}{{if and (eq $.LastRow $r) (eq $.LastCol $c)}} lastMove{{end}}{{if isWinning $.WinningCells $r $c}} winning{{end}}"
            data-row="{{$r}}"
            data-col="{{$c}}">
         </a>
@@ -50,15 +47,15 @@
   </div>
 
   <form action="/reset" method="get">
-    <button type="submit">Recommencer</button>
+    <button type="submit">🔄 Recommencer</button>
   </form>
 
   <div class="help-section">
     <h3>📖 Guide des pouvoirs :</h3>
     <ul>
-      <li> <strong>Destroy</strong> : Détruit une pièce adverse (la gravité s'applique)</li>
-      <li> <strong>Swap</strong> : Échange deux pièces verticalement adjacentes</li>
-      <li> <strong>Block</strong> : Bloque une colonne avec une pièce neutre</li>
+      <li>💣 <strong>Destroy</strong> : Détruit une pièce adverse (la gravité s'applique)</li>
+      <li>🔄 <strong>Swap</strong> : Échange deux pièces verticalement adjacentes</li>
+      <li>🚫 <strong>Block</strong> : Bloque une colonne avec une pièce neutre</li>
     </ul>
   </div>
 </body>
