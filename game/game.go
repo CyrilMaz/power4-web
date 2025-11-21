@@ -20,8 +20,7 @@ type Game struct {
 	LastCol      int
 	WinningCells [][2]int
 	Powers       map[int][]Power
-	Theme        string // light or dark
-       map[int][]Power
+	Theme        string
 }
 
 func NewGame() *Game {
