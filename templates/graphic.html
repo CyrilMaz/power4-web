@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" data-theme="{{.Theme}}">
 <head>
   <meta charset="UTF-8">
   <title>Puissance 4 - Mode Pouvoirs</title>
@@ -7,7 +7,12 @@
   <script src="/static/script.js" defer></script>
 </head>
 <body>
-  <h1>Puissance 4 Mode Pouvoirs</h1>
+  <div class="header">
+    <h1>Puissance 4 Mode Pouvoirs</h1>
+    <a href="/toggle-theme" class="theme-toggle" title="Changer le thème">
+      {{if eq .Theme "light"}}🌙{{else}}☀️{{end}}
+    </a>
+  </div>
 
   {{if eq .Winner 0}}
     <p id="status">Tour du joueur {{.Current}} {{if eq .Current 1}}🔴{{else}}🟡{{end}}</p>

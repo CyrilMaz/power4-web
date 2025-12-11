@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/CyrilMaz/power4-web/handlers"
+	"github.com/CyrilMaz/power4-web/theme"
 )
 
 func main() {
@@ -12,6 +13,7 @@ func main() {
 	http.HandleFunc("/play", handlers.Play)
 	http.HandleFunc("/power", handlers.UsePower)
 	http.HandleFunc("/reset", handlers.Reset)
+	http.HandleFunc("/toggle-theme", theme.ToggleHandler)
 
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 

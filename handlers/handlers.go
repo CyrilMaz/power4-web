@@ -8,6 +8,7 @@ import (
 	"sync"
 
 	"github.com/CyrilMaz/power4-web/game"
+	"github.com/CyrilMaz/power4-web/theme"
 )
 
 var (
@@ -26,10 +27,20 @@ var tmpl = template.Must(template.New("graphic.html").Funcs(template.FuncMap{
 	},
 }).ParseFiles("templates/graphic.html"))
 
+type TemplateData struct {
+	*game.Game
+	Theme string
+}
+
 func Home(w http.ResponseWriter, r *http.Request) {
 	mu.Lock()
-	defer mu.Unlock()
-	if err := tmpl.Execute(w, Game); err != nil {
+	currentTheme := theme.GetTheme(r)
+	data := TemplateData{
+		Game:  Game,
+		Theme: currentTheme,
+	}
+	mu.Unlock()
+	if err := tmpl.Execute(w, data); err != nil {
 		log.Println("Erreur template:", err)
 	}
 }
