@@ -1,0 +1,252 @@
+/* Styles généraux */
+:root {
+    --bg-gradient-start: #0077b6;
+    --bg-gradient-end: #00b4d8;
+    --text-color: #fff;
+    --board-bg: #023e8a;
+    --cell-bg: #e0e0e0;
+}
+
+[data-theme="dark"] {
+    --bg-gradient-start: #1a1a2e;
+    --bg-gradient-end: #16213e;
+    --text-color: #eee;
+    --board-bg: #0f3460;
+    --cell-bg: #2a2a3e;
+}
+
+body {
+    font-family: "Poppins", sans-serif;
+    text-align: center;
+    background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+    color: var(--text-color);
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+}
+
+.header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    position: relative;
+    margin-top: 20px;
+}
+
+h1 {
+    margin: 0;
+    font-size: 2em;
+}
+
+.theme-toggle {
+    position: absolute;
+    right: 30px;
+    font-size: 1.8em;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+    padding: 10px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.theme-toggle:hover {
+    transform: rotate(20deg) scale(1.1);
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* Pouvoirs */
+.powers-container {
+    margin: 20px auto;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    max-width: 600px;
+    backdrop-filter: blur(10px);
+}
+
+.powers-list {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.power-btn {
+    padding: 12px 20px;
+    font-size: 1em;
+    border: 2px solid #fff;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+    color: #fff;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.power-btn.disabled {
+    background: #666;
+    border-color: #888;
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.power-btn.active {
+    background: linear-gradient(135deg, #51cf66, #37b24d);
+    animation: pulse 0.5s infinite;
+    border-color: #fff;
+}
+
+.power-uses {
+    font-size: 0.85em;
+    opacity: 0.9;
+}
+
+.instruction {
+    margin-top: 10px;
+    font-style: italic;
+    color: #ffd700;
+    font-size: 0.95em;
+}
+
+.instruction.hidden {
+    display: none;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+/* Plateau de jeu */
+.board {
+    display: grid;
+    grid-template-columns: repeat(7, 80px);
+    grid-template-rows: repeat(6, 80px);
+    gap: 6px;
+    justify-content: center;
+    margin: auto;
+    background: var(--board-bg);
+    border-radius: 15px;
+    padding: 15px;
+    box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.5), 0 8px 20px rgba(0, 0, 0, 0.3);
+    width: 600px;
+}
+
+.cell {
+    display: inline-block;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: var(--cell-bg);
+    cursor: pointer;
+    transition: transform 0.3s ease-out;
+}
+
+.cell:hover {
+    transform: scale(1.1);
+}
+
+.cell.power-target:hover {
+    box-shadow: 0 0 20px #ffd700;
+    transform: scale(1.15);
+}
+
+.player1 {
+    background: radial-gradient(circle at 30% 30%, #ff5252, #c62828);
+}
+
+.player2 {
+    background: radial-gradient(circle at 30% 30%, #ffee58, #fbc02d);
+}
+
+.blocked {
+    background: radial-gradient(circle at 30% 30%, #888, #444);
+    cursor: not-allowed;
+}
+
+.col-full {
+    opacity: 0.6;
+}
+
+.lastMove {
+    animation: drop 0.5s ease-out;
+}
+
+.winning {
+    animation: blink 0.6s infinite;
+}
+
+@keyframes blink {
+    0%, 100% {
+        filter: brightness(1);
+    }
+    50% {
+        filter: brightness(1.8);
+    }
+}
+
+@keyframes drop {
+    0% {
+        transform: translateY(-150px) scale(0.9);
+        opacity: 0.3;
+    }
+    80% {
+        transform: translateY(10px) scale(1.05);
+    }
+    100% {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+}
+
+/* Boutons */
+button[type="submit"] {
+    padding: 10px 20px;
+    font-size: 1em;
+    border: none;
+    border-radius: 6px;
+    background: #48cae4;
+    color: #023e8a;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    margin-top: 20px;
+}
+
+button[type="submit"]:hover {
+    background: #90e0ef;
+}
+/* Section d'aide */
+.help-section {
+    margin: 30px auto;
+    padding: 20px;
+    max-width: 600px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    backdrop-filter: blur(10px);
+}
+
+.help-section ul {
+    list-style: none;
+    padding: 0;
+    text-align: left;
+}
+
+.help-section li {
+    padding: 8px;
+    margin: 5px 0;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 5px;
+}

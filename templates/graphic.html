@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="{{.Theme}}">
+<head>
+  <meta charset="UTF-8">
+  <title>Puissance 4 - Mode Pouvoirs</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="/static/script.js" defer></script>
+</head>
+<body>
+  <div class="header">
+    <h1>Puissance 4 Mode Pouvoirs</h1>
+    <a href="/toggle-theme" class="theme-toggle" title="Changer le thème">
+      {{if eq .Theme "light"}}🌙{{else}}☀️{{end}}
+    </a>
+  </div>
+
+  {{if eq .Winner 0}}
+    <p id="status">Tour du joueur {{.Current}} {{if eq .Current 1}}🔴{{else}}🟡{{end}}</p>
+  {{else}}
+    <p id="status">Joueur {{.Winner}} a gagné !</p>
+  {{end}}
+
+  {{if eq .Winner 0}}
+    <div class="powers-container">
+      <h3>Pouvoirs disponibles :</h3>
+      <div class="powers-list">
+        {{$powers := index .Powers .Current}}
+        {{range $powers}}
+          <button class="power-btn{{if eq .Uses 0}} disabled{{end}}" 
+                  data-power="{{.Name}}"
+                  {{if eq .Uses 0}}disabled aria-disabled="true"{{end}}>
+            {{if eq .Name "Détruire"}}💣{{else if eq .Name "Échanger"}}🔄{{else if eq .Name "Bloquer"}}🚫{{end}} 
+            {{.Name}}
+            <span class="power-uses">({{.Uses}}/{{.MaxUses}})</span>
+          </button>
+        {{end}}
+      </div>
+      <p id="power-instruction" class="instruction hidden">Cliquez sur une case pour utiliser le pouvoir</p>
+    </div>
+  {{end}}
+
+  <div id="board" class="board">
+    {{range $r, $row := .Board}}
+      {{range $c, $cell := $row}}
+        <a href="/play?col={{$c}}"
+           class="cell{{if eq $cell 1}} player1{{else if eq $cell 2}} player2{{else if eq $cell 3}} blocked{{end}}{{if and (eq $.LastRow $r) (eq $.LastCol $c)}} lastMove{{end}}{{if isWinning $.WinningCells $r $c}} winning{{end}}"
+           data-row="{{$r}}"
+           data-col="{{$c}}"
+           {{if eq $cell 3}} aria-disabled="true" title="Colonne bloquée"{{end}}>
+        </a>
+      {{end}}
+    {{end}}
+  </div>
+
+  <form action="/reset" method="get">
+    <button type="submit">🔄 Recommencer</button>
+  </form>
+
+  <div class="help-section">
+    <h3>📖 Guide des pouvoirs :</h3>
+    <ul>
+      <li>💣 <strong>Détruire</strong> : Détruit une pièce adverse (la gravité s'applique)</li>
+      <li>🔄 <strong>Échange</strong> : Échange une pièce avec celle en dessous</li>
+      <li>🚫 <strong>Bloquer</strong> : Place un bloc neutre dans la colonne (ne tombe pas)</li>
+    </ul>
+  </div>
+</body>
+</html>
