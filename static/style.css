@@ -136,12 +136,12 @@ h1 {
     grid-template-rows: repeat(6, 80px);
     gap: 6px;
     justify-content: center;
-    margin: 30px auto;
+    margin: auto;
     background: var(--board-bg);
     border-radius: 15px;
     padding: 15px;
     box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.5), 0 8px 20px rgba(0, 0, 0, 0.3);
-    width: 45%;
+    width: 600px;
 }
 
 .cell {
